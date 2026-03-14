@@ -1,1 +1,465 @@
-ai_studio_code (43).html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWESHMUZIK | Elevate Your Senses</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0b0b0b;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --primary-gradient: linear-gradient(135deg, #a855f7, #3b82f6);
+            --accent-pink: #ec4899;
+            --accent-blue: #00d4ff;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- Global Resets --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- Loading Animation --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease;
+        }
+        .loader-circle {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--glass-border);
+            border-top: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- Reusable Components --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section-padding { padding: 100px 0; }
+        .gradient-text {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+        }
+        .btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary { background: var(--primary-gradient); color: white; }
+        .btn-outline { border: 1px solid var(--accent-blue); color: white; background: transparent; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); }
+
+        /* --- Custom Cursor --- */
+        #cursor-glow {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            transition: 0.1s;
+        }
+
+        /* --- Scroll Progress Bar --- */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            z-index: 1001;
+            width: 0%;
+        }
+
+        /* --- Navbar --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 25px 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+        nav.sticky {
+            padding: 15px 0;
+            background: rgba(11, 11, 11, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        nav .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
+        .nav-links { display: flex; list-style: none; gap: 30px; }
+        .nav-links a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            font-size: 0.9rem; 
+            font-weight: 500;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--accent-blue); }
+        .menu-toggle { display: none; font-size: 1.5rem; color: white; cursor: pointer; }
+
+        /* --- Hero Section --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .hero-text h1 { font-size: 4.5rem; line-height: 1.1; margin-bottom: 25px; font-weight: 800; }
+        .hero-text p { font-size: 1.1rem; color: var(--text-dim); margin-bottom: 35px; max-width: 500px; }
+        .hero-btns { display: flex; gap: 20px; }
+        
+        .hero-img-box { position: relative; }
+        .hero-img-box img { 
+            width: 100%; 
+            filter: drop-shadow(0 0 50px rgba(168, 85, 247, 0.3));
+            animation: float 6s ease-in-out infinite;
+        }
+        .stats-badge {
+            position: absolute;
+            bottom: 20%;
+            left: -10%;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        .stat-item { text-align: center; }
+        .stat-item h3 { font-size: 1.5rem; color: var(--accent-blue); }
+        .stat-item span { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-30px) rotate(3deg); }
+        }
+
+        /* --- About Section --- */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .about-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 40px; }
+        .about-card { padding: 30px; text-align: center; transition: var(--transition); }
+        .about-card:hover { background: rgba(255,255,255,0.06); transform: scale(1.05); }
+        .about-card i { font-size: 2rem; margin-bottom: 15px; color: var(--accent-pink); }
+
+        .counter-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-top: 40px; }
+        .counter-item h2 { font-size: 2.5rem; }
+
+        /* --- Technology & Features --- */
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 50px; }
+        .tech-card { padding: 40px; position: relative; overflow: hidden; }
+        .tech-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--primary-gradient);
+        }
+        .tech-card i { font-size: 2.5rem; margin-bottom: 20px; color: var(--accent-blue); }
+
+        /* --- Product Showcase --- */
+        .showcase { text-align: center; background: radial-gradient(circle at center, #1a1a1a 0%, #0b0b0b 100%); }
+        .showcase-ring {
+            width: 400px;
+            height: 400px;
+            margin: 50px auto;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed rgba(255,255,255,0.1);
+            animation: rotateRing 20s linear infinite;
+        }
+        .showcase-img { 
+            width: 300px; 
+            position: absolute; 
+            animation: counterRotate 20s linear infinite;
+        }
+        .color-variants { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+        .color-btn { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+        .color-btn.active { border-color: white; transform: scale(1.2); }
+
+        @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes counterRotate { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+        /* --- Testimonials --- */
+        .testimonial-slider { margin-top: 50px; position: relative; overflow: hidden; padding: 20px 0; }
+        .testimonial-track { display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); gap: 30px; }
+        .testimonial-item { min-width: calc(33.33% - 20px); padding: 40px; }
+        .user-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .user-info img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--accent-blue); }
+        .stars { color: #facc15; font-size: 0.8rem; }
+
+        /* --- Pricing --- */
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px; }
+        .price-card { padding: 50px 30px; text-align: center; position: relative; }
+        .price-card.popular { border: 2px solid var(--accent-blue); transform: scale(1.05); }
+        .price-card.popular::after {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -15px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-blue); color: black;
+            padding: 5px 15px; font-size: 0.7rem; font-weight: 800; border-radius: 20px;
+        }
+        .price-card h2 { font-size: 3rem; margin: 20px 0; }
+        .price-features { list-style: none; margin: 30px 0; color: var(--text-dim); }
+        .price-features li { margin-bottom: 10px; }
+
+        /* --- FAQ Section --- */
+        .faq-container { max-width: 800px; margin: 50px auto; }
+        .faq-item { margin-bottom: 15px; overflow: hidden; }
+        .faq-header { 
+            padding: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer; 
+            background: var(--bg-card);
+            border-radius: 10px;
+        }
+        .faq-body { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: 0.4s ease; 
+            padding: 0 20px; 
+            background: rgba(255,255,255,0.01);
+        }
+        .faq-item.active .faq-body { max-height: 200px; padding: 20px; }
+        .faq-item.active i { transform: rotate(180deg); }
+
+        /* --- Contact Section --- */
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+        .contact-form { display: flex; flex-direction: column; gap: 20px; }
+        .contact-form input, .contact-form textarea {
+            padding: 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: white;
+            outline: none;
+        }
+        .contact-form input:focus { border-color: var(--accent-blue); }
+
+        /* --- Footer --- */
+        footer { padding: 80px 0 30px; border-top: 1px solid var(--glass-border); }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 50px; }
+        .footer-links h4 { margin-bottom: 25px; }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a { color: var(--text-dim); text-decoration: none; transition: 0.3s; }
+        .footer-links a:hover { color: var(--accent-blue); }
+        .social-icons { display: flex; gap: 20px; margin-top: 20px; }
+        .social-icons i { font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .social-icons i:hover { color: var(--accent-blue); }
+
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+            z-index: 999;
+        }
+        #backToTop.show { opacity: 1; visibility: visible; }
+
+        /* --- Mobile Responsive --- */
+        @media (max-width: 992px) {
+            .hero-text h1 { font-size: 3.2rem; }
+            .hero-grid, .about-grid, .contact-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-text p, .hero-btns { margin-left: auto; margin-right: auto; justify-content: center; }
+            .testimonial-item { min-width: calc(50% - 15px); }
+            .stats-badge { position: static; justify-content: center; margin-top: 30px; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0; right: -100%;
+                height: 100vh; width: 80%;
+                background: #0b0b0b;
+                flex-direction: column;
+                padding: 100px 40px;
+                transition: 0.5s;
+                z-index: 1001;
+            }
+            .nav-links.active { right: 0; }
+            .menu-toggle { display: block; }
+            .testimonial-item { min-width: 100%; }
+            .hero-text h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress -->
+    <div id="scroll-progress"></div>
+
+    <!-- Cursor Glow Effect -->
+    <div id="cursor-glow"></div>
+
+    <!-- Preloader -->
+    <div id="loader">
+        <div class="loader-circle"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="container">
+            <div class="logo">PWESH<span class="gradient-text">MUZIK</span></div>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#tech">Technology</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><button class="btn btn-primary" style="padding: 8px 20px;">Sign In</button></li>
+            </ul>
+            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-text reveal">
+                    <h1>GOOD MUSIC <br> <span class="gradient-text">HEALS SOULS.</span></h1>
+                    <p>Immerse yourself in the purity of studio-grade sound. Experience our advanced AI-driven noise cancellation and spatial audio technology designed for the true audiophile.</p>
+                    <div class="hero-btns">
+                        <a href="#pricing" class="btn btn-primary">Buy Now — $299</a>
+                        <a href="#tech" class="btn btn-outline">Explore Tech</a>
+                    </div>
+                </div>
+                <div class="hero-img-box reveal" style="transition-delay: 0.2s;">
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Premium Headphones" id="main-product-img">
+                    <div class="stats-badge glass">
+                        <div class="stat-item">
+                            <h3>1M+</h3>
+                            <span>Users</span>
+                        </div>
+                        <div class="stat-item">
+                            <h3>4.9</h3>
+                            <span>Rating</span>
+                        </div>
+                        <div class="stat-item">
+                            <h3>30h</h3>
+                            <span>Battery</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section-padding" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="reveal">
+                    <h4 class="gradient-text" style="text-transform: uppercase; letter-spacing: 2px;">Our Story</h4>
+                    <h2 style="font-size: 2.5rem; margin: 15px 0;">Defining the Future of Sound</h2>
+                    <p style="color: var(--text-dim);">PWESHMUZIK is a premium audio technology company focused on delivering studio quality sound for everyday users. Founded with the vision of combining design and performance, the company builds products for music lovers, gamers and professionals.</p>
+                    
+                    <div class="counter-box">
+                        <div class="counter-item">
+                            <h2 class="gradient-text count" data-target="1000000">0</h2>
+                            <p>Customers</p>
+                        </div>
+                        <div class="counter-item">
+                            <h2 class="gradient-text count" data-target="50">0</h2>
+                            <p>Countries</p>
+                        </div>
+                        <div class="counter-item">
+                            <h2 class="gradient-text count" data-target="25">0</h2>
+                            <p>Awards</p>
+                        </div>
+                        <div class="counter-item">
+                            <h2 class="gradient-text count" data-target="10">0</h2>
+                            <p>Years XP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-cards">
+                    <div class="about-card glass reveal">
+                        <i class="fas fa-microchip"></i>
+                        <h3>Innovation</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-dim);">Cutting-edge R&D in acoustic engineering.</p>
+                    </div>
+                    <div class="about-card glass reveal" style="transition-delay: 0.1s;">
+                        <i class="fas fa-gem"></i>
+                        <h3>Premium Build</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-dim);">Aerospace-grade aluminum and fine leather.</p>
+                    </div>
+                    <div class="about-card glass reveal" style="transition-delay: 0.2s;">
+                        <i class="fas fa-heart"></i>
+                        <h3>Customer First</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-dim);">Lifetime support and global warranty.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section class="section-padding" id="tech" style="background: #080808;">
+        <div class="container">
+            <div style="text-align: center; max-width: 700px; margin: 0 auto;" class="reveal">
+                <h2 style="font-size: 2.5rem;">CRAFTED WITH <span class="gradient-text">SCIENCE</span></h2>
+                <p style="color: var(--text-dim);">Our engineering team spent 3 years perfecting the acoustic chamber to deliver zero-distortion audio.</p>
+        
